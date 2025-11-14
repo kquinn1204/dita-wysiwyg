@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Topic, createEmptyTopic } from '../models/Topic';
-import { generateId, Paragraph, UnorderedList } from '../models/DitaElements';
+import { generateId, Paragraph, UnorderedList, BodyElement } from '../models/DitaElements';
 
 interface TopicStore {
   currentTopic: Topic | null;
@@ -11,6 +11,7 @@ interface TopicStore {
   // Actions
   createNewTopic: () => void;
   updateTitle: (title: string) => void;
+  updateBody: (content: BodyElement[]) => void;
   addParagraph: (afterId?: string) => void;
   convertToList: (paragraphId: string) => void;
   convertToParagraph: (listItemId: string) => void;
@@ -34,6 +35,14 @@ export const useTopicStore = create<TopicStore>()(
     updateTitle: (title: string) => set((state) => {
       if (state.currentTopic) {
         state.currentTopic.title = title;
+        state.currentTopic.metadata.modifiedAt = new Date().toISOString();
+        state.isDirty = true;
+      }
+    }),
+
+    updateBody: (content: BodyElement[]) => set((state) => {
+      if (state.currentTopic) {
+        state.currentTopic.body.content = content as any;
         state.currentTopic.metadata.modifiedAt = new Date().toISOString();
         state.isDirty = true;
       }
